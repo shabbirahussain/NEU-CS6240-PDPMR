@@ -30,9 +30,9 @@ public class KScorerMapper implements Mapper{
      */
     WordStats map(String text){
         String[] words = text
-                .replaceAll(validCharsRegex, "")
+                .replaceAll(validCharsRegex, " ")
                 .toLowerCase()
-                .split(" ");
+                .split("\\s+");
 
         // Compute the score for each word
         int[] scores = new int[words.length];
@@ -108,9 +108,8 @@ public class KScorerMapper implements Mapper{
          */
         public Integer put(final String key, final Integer value){
             WordStatsModel model = modelMap.getOrDefault(key, new WordStatsModel());
-            int wordScore = model.wordScore + value;
-            int wordCount = model.wordCount + 1;
-            model = new WordStatsModel(wordScore, wordCount);
+            model = new WordStatsModel(model.wordScore + value
+                    , model.wordCount + 1);
             modelMap.put(key, model);
 
             return model.getMean();
