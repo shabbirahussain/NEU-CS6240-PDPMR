@@ -2,7 +2,7 @@ package com.pdpmr.task0.subtasks;
 
 import com.google.common.util.concurrent.AtomicLongMap;
 import com.pdpmr.task0.Executor;
-import com.pdpmr.task0.mappers.LetterCounter;
+import com.pdpmr.task0.mappers.LetterCounterMapper;
 import com.pdpmr.task0.collectors.CounterCombiner;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class LetterScorer {
     public Map<Character, Integer> getScoreFromCorpus(String directory) throws IOException{
         AtomicLongMap<Character> cntMap = (AtomicLongMap<Character>) this.executor.run(
                 directory
-                , new LetterCounter(this.validCharsRegex)
+                , new LetterCounterMapper(this.validCharsRegex)
                 , new CounterCombiner());
         return getLetterScoreFromPercentage(cntMap.asMap());
     }

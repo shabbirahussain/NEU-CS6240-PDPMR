@@ -73,17 +73,16 @@ public class Executor {
         executor.shutdown();
 
         // Collect results
-        AtomicLongMap<Character> atomicCntMap = AtomicLongMap.create();
         do{
             for (ListIterator<FutureTask> iterator = futureTasks.listIterator(); iterator.hasNext();){
                 FutureTask futureTask = iterator.next();
-                if (futureTask.isDone()){
-                    try {
-                        collector.collect(futureTask.get());
-                        iterator.remove();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                if (!futureTask.isDone()) continue;
+
+                try {
+                    collector.collect(futureTask.get());
+                    iterator.remove();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }while(futureTasks.size() > 0);

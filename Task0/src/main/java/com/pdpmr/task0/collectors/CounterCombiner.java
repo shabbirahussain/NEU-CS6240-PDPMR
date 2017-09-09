@@ -13,8 +13,8 @@ public class CounterCombiner implements Collector{
     }
 
     /**
-     * Combines the counts from inputs into a new output.
-     * @param map1 is input map1.
+     * Combines the counts from input into a new output.
+     * @param map1 is input map to be combined from.
      * @return AtomicLongMap having keys from both inputs and value equal to the sum of values from both inputs.
      */
     private AtomicLongMap<Character> mergeCount(final AtomicLongMap<Character> map1) {

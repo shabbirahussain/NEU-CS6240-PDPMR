@@ -7,10 +7,10 @@ import java.util.Arrays;
 /**
  * Created by shabbirhussain on 9/8/17.
  */
-public class LetterCounter implements Mapper{
+public class LetterCounterMapper implements Mapper{
     private String validCharsRegex;
 
-    public LetterCounter(String validCharsRegex){
+    public LetterCounterMapper(String validCharsRegex){
         this.validCharsRegex = validCharsRegex;
     }
 
