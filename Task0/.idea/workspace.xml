@@ -1,20 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/src/main/java/com/pdpmr/task0/Main.java" line="39" />
-  </component>
   <component name="ChangeListManager">
     <list default="true" id="2de94fbd-2775-4e0e-a09b-3860dd31a55f" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__net_sf_jopt_simple_jopt_simple_4_6.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_commons_commons_math3_3_2.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_openjdk_jmh_jmh_core_1_5_1.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_openjdk_jmh_jmh_generator_annprocess_1_5_1.xml" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/com/pdpmr/task0/test.class" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/pdpmr/task0/Main.class" afterPath="$PROJECT_DIR$/target/classes/com/pdpmr/task0/Main.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/pdpmr/task0/mappers/KScorerMapper$WordStats.class" afterPath="$PROJECT_DIR$/target/classes/com/pdpmr/task0/mappers/KScorerMapper$WordStats.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/pdpmr/task0/mappers/KScorerMapper.class" afterPath="$PROJECT_DIR$/target/classes/com/pdpmr/task0/mappers/KScorerMapper.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/pdpmr/task0/subtasks/KScorer.class" afterPath="$PROJECT_DIR$/target/classes/com/pdpmr/task0/subtasks/KScorer.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/resources/config.properties" afterPath="$PROJECT_DIR$/resources/config.properties" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Task0.iml" afterPath="$PROJECT_DIR$/Task0.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pom.xml" afterPath="$PROJECT_DIR$/pom.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/pdpmr/task0/Main.java" afterPath="$PROJECT_DIR$/src/main/java/com/pdpmr/task0/Main.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/pdpmr/task0/mappers/KScorerMapper.java" afterPath="$PROJECT_DIR$/src/main/java/com/pdpmr/task0/mappers/KScorerMapper.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/pdpmr/task0/subtasks/KScorer.java" afterPath="$PROJECT_DIR$/src/main/java/com/pdpmr/task0/subtasks/KScorer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/config.properties" afterPath="$PROJECT_DIR$/target/classes/config.properties" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -33,11 +30,30 @@
       <file leaf-file-name="Main.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/pdpmr/task0/Main.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="270">
-              <caret line="18" column="34" lean-forward="true" selection-start-line="18" selection-start-column="34" selection-end-line="18" selection-end-column="35" />
+            <state relative-caret-position="26">
+              <caret line="33" column="17" lean-forward="false" selection-start-line="33" selection-start-column="17" selection-end-line="33" selection-end-column="17" />
               <folding>
                 <element signature="imports" expanded="true" />
+                <element signature="method#Main#0;class#Main#0" expanded="false" />
+                <element signature="docComment;method#generateSimpleOutput#0;class#Main#0" expanded="false" />
+                <element signature="method#generateSimpleOutput#0;class#Main#0" expanded="false" />
+                <element signature="docComment;method#generateBenchmarkResults#0;class#Main#0" expanded="false" />
+                <element signature="method#generateBenchmarkResults#0;class#Main#0" expanded="false" />
+                <element signature="docComment;method#subtask1#0;class#Main#0" expanded="false" />
+                <element signature="method#subtask1#0;class#Main#0" expanded="false" />
+                <element signature="docComment;method#subtask2#0;class#Main#0" expanded="false" />
+                <element signature="method#subtask2#0;class#Main#0" expanded="false" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/pom.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="296">
+              <caret line="28" column="0" lean-forward="false" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -45,7 +61,7 @@
       <file leaf-file-name="KScorer.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/pdpmr/task0/subtasks/KScorer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="341">
+            <state relative-caret-position="388">
               <caret line="39" column="5" lean-forward="false" selection-start-line="39" selection-start-column="5" selection-end-line="39" selection-end-column="5" />
               <folding>
                 <element signature="imports" expanded="true" />
@@ -58,7 +74,7 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/com/pdpmr/task0/mappers/KScorerMapper.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="161">
-              <caret line="139" column="0" lean-forward="true" selection-start-line="139" selection-start-column="0" selection-end-line="139" selection-end-column="0" />
+              <caret line="139" column="0" lean-forward="false" selection-start-line="139" selection-start-column="0" selection-end-line="139" selection-end-column="0" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="docComment;method#getWordScore#0;class#KScorerMapper#0" expanded="false" />
@@ -100,7 +116,6 @@
         <option value="$PROJECT_DIR$/src/com/pdpmr/task0/mappers/LetterCounter.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/pdpmr/task0/mappers/LetterCounterTest.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/pdpmr/task0/mappers/LetterCounterTest.groovy" />
-        <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/main/java/com/pdpmr/task0/reducers/CounterCombiner.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/pdpmr/task0/mappers/Mapper.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/pdpmr/task0/collectors/Collector.java" />
@@ -114,8 +129,9 @@
         <option value="$PROJECT_DIR$/src/main/java/com/pdpmr/task0/test.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/pdpmr/task0/mappers/KScorerMapper.java" />
         <option value="$PROJECT_DIR$/resources/config.properties" />
-        <option value="$PROJECT_DIR$/src/main/java/com/pdpmr/task0/Main.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/pdpmr/task0/subtasks/KScorer.java" />
+        <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/src/main/java/com/pdpmr/task0/Main.java" />
       </list>
     </option>
   </component>
@@ -541,7 +557,7 @@
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3286119" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.18696883" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -580,6 +596,15 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="method#Main#0;class#Main#0" expanded="false" />
+            <element signature="docComment;method#generateSimpleOutput#0;class#Main#0" expanded="false" />
+            <element signature="method#generateSimpleOutput#0;class#Main#0" expanded="false" />
+            <element signature="docComment;method#generateBenchmarkResults#0;class#Main#0" expanded="false" />
+            <element signature="method#generateBenchmarkResults#0;class#Main#0" expanded="false" />
+            <element signature="docComment;method#subtask1#0;class#Main#0" expanded="false" />
+            <element signature="method#subtask1#0;class#Main#0" expanded="false" />
+            <element signature="docComment;method#subtask2#0;class#Main#0" expanded="false" />
+            <element signature="method#subtask2#0;class#Main#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -605,6 +630,15 @@
           <caret line="18" column="5" lean-forward="false" selection-start-line="18" selection-start-column="5" selection-end-line="18" selection-end-column="5" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="method#Main#0;class#Main#0" expanded="false" />
+            <element signature="docComment;method#generateSimpleOutput#0;class#Main#0" expanded="false" />
+            <element signature="method#generateSimpleOutput#0;class#Main#0" expanded="false" />
+            <element signature="docComment;method#generateBenchmarkResults#0;class#Main#0" expanded="false" />
+            <element signature="method#generateBenchmarkResults#0;class#Main#0" expanded="false" />
+            <element signature="docComment;method#subtask1#0;class#Main#0" expanded="false" />
+            <element signature="method#subtask1#0;class#Main#0" expanded="false" />
+            <element signature="docComment;method#subtask2#0;class#Main#0" expanded="false" />
+            <element signature="method#subtask2#0;class#Main#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -628,14 +662,6 @@
     <entry file="file://$PROJECT_DIR$/conf.xml" />
     <entry file="file://$PROJECT_DIR$/src/test/java/com/pdpmr/task0/mappers/LetterCounterTest.java" />
     <entry file="file://$PROJECT_DIR$/src/test/java/com/pdpmr/task0/mappers/LetterCounterTest.groovy" />
-    <entry file="file://$PROJECT_DIR$/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="18" column="34" lean-forward="true" selection-start-line="18" selection-start-column="34" selection-end-line="18" selection-end-column="34" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/pdpmr/task0/mappers/Mapper.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="120">
@@ -709,7 +735,7 @@
     <entry file="file://$PROJECT_DIR$/src/main/java/com/pdpmr/task0/mappers/KScorerMapper.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="161">
-          <caret line="139" column="0" lean-forward="true" selection-start-line="139" selection-start-column="0" selection-end-line="139" selection-end-column="0" />
+          <caret line="139" column="0" lean-forward="false" selection-start-line="139" selection-start-column="0" selection-end-line="139" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="docComment;method#getWordScore#0;class#KScorerMapper#0" expanded="false" />
@@ -737,7 +763,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/pdpmr/task0/subtasks/KScorer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="341">
+        <state relative-caret-position="388">
           <caret line="39" column="5" lean-forward="false" selection-start-line="39" selection-start-column="5" selection-end-line="39" selection-end-column="5" />
           <folding>
             <element signature="imports" expanded="true" />
@@ -745,12 +771,37 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="296">
+          <caret line="28" column="0" lean-forward="false" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/target/generated-sources/annotations/com/pdpmr/task0/generated/Main_jmh_B1.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" column="7" lean-forward="false" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="7" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/pdpmr/task0/Main.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="18" column="34" lean-forward="true" selection-start-line="18" selection-start-column="34" selection-end-line="18" selection-end-column="35" />
+        <state relative-caret-position="26">
+          <caret line="33" column="17" lean-forward="false" selection-start-line="33" selection-start-column="17" selection-end-line="33" selection-end-column="17" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="method#Main#0;class#Main#0" expanded="false" />
+            <element signature="docComment;method#generateSimpleOutput#0;class#Main#0" expanded="false" />
+            <element signature="method#generateSimpleOutput#0;class#Main#0" expanded="false" />
+            <element signature="docComment;method#generateBenchmarkResults#0;class#Main#0" expanded="false" />
+            <element signature="method#generateBenchmarkResults#0;class#Main#0" expanded="false" />
+            <element signature="docComment;method#subtask1#0;class#Main#0" expanded="false" />
+            <element signature="method#subtask1#0;class#Main#0" expanded="false" />
+            <element signature="docComment;method#subtask2#0;class#Main#0" expanded="false" />
+            <element signature="method#subtask2#0;class#Main#0" expanded="false" />
           </folding>
         </state>
       </provider>
