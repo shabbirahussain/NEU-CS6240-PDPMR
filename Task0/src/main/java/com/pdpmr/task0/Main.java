@@ -8,7 +8,6 @@ import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.runner.Runner;
-import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
@@ -25,17 +24,16 @@ import java.util.stream.Collectors;
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
-@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 5)
+@Measurement(iterations = 5)
 @Fork(1)
 @State(Scope.Benchmark)
 public class Main {
-    @Param({"1", "2", "3"})
+    @Param({"1", "2", "3", "4", "5"})
     public int maxThreads;
 
     public int kNeighborhood;
     public String dataDir, validCharRegex, outFilePath;
-    public Map<Character, Integer> letterScores;
 
     public Main(){
         try {
@@ -47,8 +45,6 @@ public class Main {
             validCharRegex = prop.getProperty("valid-char-regex");
             kNeighborhood = Integer.parseInt(prop.getProperty("k-neighborhoods"));
             outFilePath = prop.getProperty("csv-file-path");
-
-            letterScores = subtask1();
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -68,19 +64,11 @@ public class Main {
      * @throws IOException
      */
     @Benchmark
-    public Map<Character, Integer> subtask1()
+    public void task0()
             throws IOException{
-        return (new LetterScorer(maxThreads, validCharRegex))
+        Map<Character, Integer>  letterScores = (new LetterScorer(maxThreads, validCharRegex))
                 .getScoreFromCorpus(dataDir);
-    }
 
-    /**
-     * Calculates the K-score for words and prints to a csv file.
-     * @throws IOException
-     */
-    @Benchmark
-    public void subtask2()
-            throws IOException {
         Files.write(Paths.get(outFilePath)
                 , (new KScorer(maxThreads, validCharRegex, kNeighborhood, letterScores))
                         .getScoreFromCorpus(dataDir)
