@@ -25,12 +25,18 @@ import java.util.stream.Collectors;
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
-@State(Scope.Thread)
+@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.MILLISECONDS)
+@Fork(1)
+@State(Scope.Benchmark)
 public class Main {
-    int maxThreads, kNeighborhood;
-    String dataDir, validCharRegex, outFilePath;
-    Map<Character, Integer> letterScores;
-    
+    @Param({"1", "2", "3"})
+    public int maxThreads;
+
+    public int kNeighborhood;
+    public String dataDir, validCharRegex, outFilePath;
+    public Map<Character, Integer> letterScores;
+
     public Main(){
         try {
             Properties prop = new Properties();
@@ -49,30 +55,8 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception {
-        generateBenchmarkResults();
-        //generateSimpleOutput();
-    }
-
-    /**
-     * Generates one time output.
-     * @throws IOException
-     */
-    public static void generateSimpleOutput() throws IOException {
-        Main main = new Main();
-        main.subtask1();
-        main.subtask2();
-    }
-
-    /**
-     * Generates a benchmarf of performance.
-     * @throws RunnerException
-     */
-    public static void generateBenchmarkResults() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Main.class.getSimpleName())
-                .warmupIterations(5)
-                .measurementIterations(5)
-                .forks(1)
                 .build();
 
         new Runner(opt).run();
@@ -97,13 +81,12 @@ public class Main {
     @Benchmark
     public void subtask2()
             throws IOException {
-
         Files.write(Paths.get(outFilePath)
                 , (new KScorer(maxThreads, validCharRegex, kNeighborhood, letterScores))
                         .getScoreFromCorpus(dataDir)
                         .stream()
                         .sorted(Comparator.comparing(Map.Entry::getKey))
-                        .map(e->e.getKey() + ", " + e.getValue())
+                        .map(e-> e.getKey() + ", " + e.getValue())
                         .collect(Collectors.joining("\n"))
                         .getBytes());
     }

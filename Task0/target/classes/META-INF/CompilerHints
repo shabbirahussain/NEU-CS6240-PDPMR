@@ -4,5 +4,3 @@ dontinline,*.*_sample_jmhStub
 dontinline,*.*_ss_jmhStub
 dontinline,*.*_thrpt_jmhStub
 inline,com/pdpmr/task0/Main.subtask1
-inline,com/pdpmr/task0/Main.subtask2
-inline,org/openjdk/jmh/infra/Blackhole.clearSinks

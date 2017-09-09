@@ -31,8 +31,10 @@ public class KScorerMapper implements Mapper{
     WordStats map(String text){
         String[] words = text
                 .replaceAll(validCharsRegex, " ")
+                .trim()
                 .toLowerCase()
                 .split("\\s+");
+
 
         // Compute the score for each word
         int[] scores = new int[words.length];
