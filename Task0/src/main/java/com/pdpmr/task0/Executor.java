@@ -59,7 +59,9 @@ public class Executor {
         getListOfFiles(directory).forEach(p -> {
             futureTasks.add(new FutureTask<>(() -> {
                 try {
-                    String text = com.google.common.io.Files.toString(p.toFile(), Charset.defaultCharset());
+                    String text = com.google.common.io.Files
+                            .asCharSource(p.toFile(), Charset.defaultCharset())
+                            .read();
                     return mapper.map(text);
                 }catch (IOException e){
                     e.printStackTrace();
