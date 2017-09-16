@@ -25,11 +25,11 @@ import java.util.stream.Collectors;
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Warmup(iterations = 5)
-@Measurement(iterations = 100)
+@Measurement(iterations = 300)
 @Fork(1)
 @State(Scope.Benchmark)
 public class Main {
-    @Param({"1", "2", "3", "4", "5", "6", "7"})
+    @Param({"1", "2", "3", "4", "5", "6", "7", "8", "9"})
     public int maxThreads;
 
     public int kNeighborhood;

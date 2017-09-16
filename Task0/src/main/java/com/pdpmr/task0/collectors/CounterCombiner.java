@@ -17,14 +17,14 @@ public class CounterCombiner implements Collector{
      * @param map1 is input map to be combined from.
      * @return AtomicLongMap having keys from both inputs and value equal to the sum of values from both inputs.
      */
-    private AtomicLongMap<Character> mergeCount(final AtomicLongMap<Character> map1) {
+    private AtomicLongMap<Character> collect(final AtomicLongMap<Character> map1) {
         map1.asMap().forEach(map::getAndAdd);
         return map;
     }
 
     @Override
     public Object collect(final Object input) {
-        return mergeCount((AtomicLongMap<Character>) input);
+        return collect((AtomicLongMap<Character>) input);
     }
 
     @Override

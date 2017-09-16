@@ -17,14 +17,14 @@ public class KScorerCombiner implements Collector{
      * @param wordStats1 is input word stats to be combined from.
      * @return AtomicLongMap having keys from both inputs and value equal to the sum of values from both inputs.
      */
-    private KScorerMapper.WordStats mergeCount(final KScorerMapper.WordStats wordStats1) {
+    private KScorerMapper.WordStats collect(final KScorerMapper.WordStats wordStats1) {
         wordStats.putAll(wordStats1);
         return wordStats;
     }
 
     @Override
     public Object collect(final Object input) {
-        return mergeCount((KScorerMapper.WordStats) input);
+        return collect((KScorerMapper.WordStats) input);
     }
 
     @Override

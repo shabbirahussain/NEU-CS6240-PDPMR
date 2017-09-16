@@ -23,11 +23,9 @@ import java.util.stream.Collectors;
  * Created by shabbirhussain on 9/8/17.
  */
 public class Executor {
-    int maximumPoolSize;
     ExecutorService executor;
 
     public Executor(int maximumPoolSize){
-        this.maximumPoolSize = maximumPoolSize;
         this.executor = Executors.newFixedThreadPool(maximumPoolSize);
     }
 
