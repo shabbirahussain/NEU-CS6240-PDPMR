@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Class-Path: guava-23.0.jar commons-cli-1.4.jar commons-csv-1.5.jar hadoop-common-2.8.1.jar hadoop-mapreduce-client-core-2.8.1.jar
+Class-Path: resources/packaged/

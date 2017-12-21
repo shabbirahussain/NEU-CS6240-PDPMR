@@ -1,0 +1,92 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+- - -
+title : "Experimental Evaluation of Task A1"
+course : "NEU CS-6240"
+author : "Shabbir Hussain"
+- - -
+```{r setup, echo=FALSE,results='hide',message=FALSE, warning=FALSE, cache=TRUE}
+require("tufte")
+require("ggplot2")
+require("dplyr")
+require("assertthat")
+require("testthat")
+```
+
+The objective of this paper is to benchmark performance of resource intensive computations (specified in the task specs) against sequential and parallel execution on a multi-core machine. We would like to see if there is any statistically significant performance boosts in having multiple cores for the specified task. Also the optimal degree of parallel threads for the same.
+
+# Experimental design
+
+We created a multithreaded java “Executor” program which has a controllable thread pool size. We run this “Executor” for each subtask with different mappers and collectors. Here we are using two mappers, one which computes letter scores and another one computes k-neighbor score for every word. Then results are accumulated by the main thread using collector.
+
+## Setup high level diagram:
+![Setup Architecture](resources/non_packaged/images/CS-6240_Task_A0_Benchmark_Report.png)
+
+## Metrics
+
+Our run metric include *iterations* (time to run end to end job on the complete set of files).
+
+## Data acquisition
+
+Measurements are done either *internally* by instrumenting the java program with JMH benhmarking framework.
+
+## Configuration
+
+This study is conducted on the following hardware specification.
+```{r}
+Sys.info()
+```
+
+Software environment is given below.
+```{sh}
+java -version
+```
+
+## Scope
+
+The scope of this study is limited to a 2 core processor system described above with specified version of operating system and Java.
+
+## Goals
+
+The goal of this **ends-based** performance study is to find the diffrence in between perormance of multiple threads in a concurrent system.
+
+## Factors impacting execution time
+
+**Fixed effects** and **random effects** can impact on execution time.
+Fixed effects include the *details of the algorithms* in the system under study (e.g. the optimizations performed by a compiler, or the details of a the indexing scheme used in a database system), *the input* (values passed into the system), *hw/sw environment* (CPU, OS, libraries, compiler optimizations, location in virtual memory).
+Random effects include location in physical memory, system load, scheduling, context switches, hw interrupts, randomized algorithms.
+Fixed effects depend on the configuration, randomize the aspects of the configuration that affect execution time.
+Random effects are modeled or summarized using statistical methods.
+
+## Acquisition
+
+We use JMH benchmark intrumented in the java code and `resources/config.properties` file to run and extract performacne data. These results will be stored in the `out/results/benchmark_out.csv`.
+
+```{sh}
+#make all
+```
+
+## Import
+
+The output of many runs are stored in `out/results/benchmark_out.csv`. This reads the data into R.
+
+```{r cache=FALSE}
+out <- read.csv("out/results/benchmark_out.csv", header = TRUE)
+out<-out[,-3]
+out$time<-round(out$time/1000, 1)
+out$maxThreads <-as.factor(out$maxThreads)
+```
+
+## Analysis
+
+```{r cache=FALSE, fig.margin=TRUE}
+ggplot(out, aes(x=maxThreads, y=time)) + 
+  geom_boxplot()
+```
+
+# Conclusion
+
+From the figure above showing running times for different thread configurations I can say there is a clear difference between a sequential (one thread) and parallel modes of execution (two plus) of approx 4s. We also see some gains from using more threads than cores between three to six. This could be an effect of gains during IO where we are reading data from disk initially for each mapper.

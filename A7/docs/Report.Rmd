@@ -1,0 +1,146 @@
+---
+title: "A7 Clustering"
+author: "Sharad, Shabbir"
+output:
+  html_document:
+    fig_caption: yes
+    toc: yes
+  pdf_document:
+    fig_caption: yes
+    toc: yes
+---
+```{r setup, include=FALSE,echo=FALSE,results='hide',message=FALSE, warning=FALSE, cache=TRUE}
+knitr::opts_chunk$set(echo = FALSE, cache=TRUE, warning = FALSE)
+knitr::opts_knit$set(root.dir = normalizePath(getwd()))
+```
+\newpage
+# Sub-Part 1
+
+
+# Design and Implementaion
+
+* First we clean the data which has been given to us.
+* The cleaned data is stored in a Custom SongRecord Format.
+* For each clustering criteria(eg. on the basis of loudness,tempo etc.) we extract the important fields and make a rdd with point object, which is a container class for the cluster points.
+* A recursive way is applied on the on the gathered points  to compute k-means.
+* For k-means of points with 1-dimensions manhattan distance is applied to calculate closeness whereas for 2-dimensional points euclid distance is applied.
+* Iterations were performed 10 times.
+
+# Execution Environment
+
+```
+OS: Ubuntu 16.04 VM
+Processor Name:	Intel(R) Core(TM) i7
+Processor Speed:	2.70GHz
+Number of Processors:	2
+Total Number of Cores:	2
+L1d cache:  32K
+L1i cache:  32K
+L2 cache: 256K
+L3 cache: 4096K
+Memory:	4 GB 
+SSD: 1 TB
+```
+
+# Graphical Representation
+* Frequeancy graph for clusters with Loudness:
+
+
+```{r, echo=FALSE, include=TRUE}
+data <- read.table("output/loud/med/part-00000", sep = ',')
+plot(data)
+``` 
+```{r, echo=FALSE, include=TRUE}
+data <- read.table("output/loud/low/part-00000", sep = ',')
+plot(data)
+``` 
+```{r, echo=FALSE, include=TRUE}
+data <- read.table("output/loud/high/part-00000", sep = ',')
+plot(data)
+``` 
+
+* Frequeancy graph for clusters with Length:
+```{r, echo=FALSE, include=TRUE}
+data <- read.table("output/length/med/part-00000", sep = ',')
+plot(data)
+``` 
+```{r, echo=FALSE, include=TRUE}
+data <- read.table("output/length/high/part-00000", sep = ',')
+plot(data)
+``` 
+```{r, echo=FALSE, include=TRUE}
+data <- read.table("output/length/low/part-00000", sep = ',')
+plot(data)
+``` 
+
+* Frequeancy graph for clusters with Tempo:
+
+```{r, echo=FALSE, include=TRUE}
+data <- read.table("output/tempo/high/part-00000", sep = ',')
+plot(data)
+``` 
+```{r, echo=FALSE, include=TRUE}
+data <- read.table("output/tempo/low/part-00000", sep = ',')
+plot(data)
+``` 
+```{r, echo=FALSE, include=TRUE}
+data <- read.table("output/tempo/med/part-00000", sep = ',')
+plot(data)
+``` 
+
+* Frequeancy graph for clusters with Hotness:
+```{r, echo=FALSE, include=TRUE}
+data <- read.table("output/hot/med/part-00000", sep = ',')
+plot(data)
+``` 
+
+```{r, echo=FALSE, include=TRUE}
+data <- read.table("output/hot/low/part-00000", sep = ',')
+plot(data)
+``` 
+
+* Frequeancy graph for clusters with Combined Hotness:
+```{r, echo=FALSE, include=TRUE}
+data <- read.table("output/comhot/med/part-00000", sep = ',')
+plot(data$V2,data$V3)
+``` 
+```{r, echo=FALSE, include=TRUE}
+data <- read.table("output/comhot/high/part-00000", sep = ',')
+plot(data$V2,data$V3)
+``` 
+```{r, echo=FALSE, include=TRUE}
+data <- read.table("output/comhot/low/part-00000", sep = ',')
+plot(data$V2,data$V3)
+```
+
+```{r, echo=FALSE, include=TRUE,warning=FALSE}
+data1 <- read.table("output/loud/med/part-00000", sep = ',')
+data2 <- read.table("output/length/med/part-00000", sep = ',')
+data3 <- read.table("output/tempo/high/part-00000", sep = ',')
+data4 <- read.table("output/hot/med/part-00000", sep = ',')
+data <- read.table("output/comhot/low/part-00000", sep = ',')
+res1 <- merge(merge(merge(data1,data2,by = "V1"),data3,by = "V1"),data,by = "V1")
+res2 <- merge(merge(merge(merge(data1,data2,by = "V1"),data3,by = "V1"),data4,by = "V1"),data,by = "V1")
+res3 <- merge(data4,data,by = "V1")
+res4 <- merge(data3,data,by = "V1")
+res5 <- merge(data2,data,by = "V1")
+res6 <- merge(data1,data,by = "V1")
+``` 
+
+# Data Observations
+
+Doing an inner join on the supplied clusters of the respective criteria show that Loudness, Length and Tempo decide if the songs combined hotness would be clustered in a particular supplied cluster category.
+There were 966 obersevartions of the Song ID which depicted this claim.
+
+Also doing the same thing with addition of the song hotness criteria again gave 966 observations.
+
+But if the particular 1 criteria is seen then the combined hotness depends on the following criteria:
+* Song Hotness with 3219 observations
+* Song Tempo with 2024 observations
+* Song Length with 2210 observations
+* Song Loudness with 20160 observations
+
+# Conclusion 
+
+Clustering algorithm is quite handy when unlabled data is to be grouped. The clusters formed with various characteristics of the song data were indicative of which songs would be clustered in the combined hotness criteria when done an inner join .As well as there were some indications pertaining to the individual data as well which stated that each criteria contributed to a certain dgree for the clustering in the combined hotness criteria. 
+

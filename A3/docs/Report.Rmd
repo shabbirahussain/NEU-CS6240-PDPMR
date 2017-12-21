@@ -1,0 +1,129 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+- - -
+title : "Experimental Evaluation of Task A3"
+course : "NEU CS-6240"
+author : "Shabbir Hussain"
+- - -
+```{r setup, echo=FALSE,results='hide',message=FALSE, warning=FALSE, cache=FALSE}
+require("tufte")
+require("ggplot2")
+require("dplyr")
+require("assertthat")
+require("testthat")
+Sys.setenv(HADOOP_HOME = HADOOP_HOME)
+```
+
+
+The objective of this paper is to benchmark performance of resource intensive computations (specified in the task specs) against sequential and parallel execution on a multi-core machine vs implementation on Hadoop. We would like to see if there is any statistically significant performance boosts in having multiple cores for the specified task. Also the optimal degree of parallel threads for the same.
+
+# Experimental design
+
+We created two mappers one to count letters in corpus and one for calculating k neighborhood scores. Then each of them is summerized by respective reducers to build one output file.
+
+## Setup high level diagram:
+![Setup Architecture](resources/non_packaged/images/CS-6240_Task_A0_Benchmark_Report.png)
+
+## Changes for median
+
+We changed the k-scorer to emit composite key of <word, score> to leverage secondary sort and stored the output of these mappers with no reducers. Then we created two jobs that tun on these files. One counts the word frequency and stores. The second one uses reducer side join to combine this file with existing Kscore output file to find median.
+
+Note: We also added nonsplitable file format to enforce consistent k scores accross block boundaries. 
+
+## Metrics
+
+Our run metric include *runs* (time to run end to end job on the complete set of files).
+
+## Data acquisition
+
+Measurements are done *externally* by instrumenting the java program with using r replicate.
+
+## Configuration
+
+This study is originally conducted on the following hardware specification:
+
+### Hardware
+
+#### Setup 1: Local
+* Processor Name:	Intel Core i5
+* Processor Speed:	2.7 GHz
+* Number of Processors:	1
+* Total Number of Cores:	2
+* L2 Cache (per Core):	256 KB
+* L3 Cache:	3 MB
+* Memory:	8 GB
+
+#### Setup 2.1: EMR (Amazon AWS):
+
+* Machine: 4 * m4.xlarge
+* 8 vCPU, 16 GiB memory, EBS only storage
+* EBS Storage:32 GiB
+
+#### Setup 2.2: EMR (Amazon AWS): 
+
+* Machine: 2 * m4.xlarge
+* 8 vCPU, 16 GiB memory, EBS only storage
+* EBS Storage:32 GiB
+
+Note: Was out of budget this time.
+
+### Software
+```{sh}
+java -version
+```
+```{sh}
+${HADOOP_HOME}/bin/hadoop version
+```
+## Scope
+
+The scope of this study is limited to a 2 core processor system described above with specified version of operating system and Java.
+
+## Factors impacting execution time
+
+**Fixed effects** and **random effects** can impact on execution time.
+Fixed effects include the *details of the algorithms* in the system under study (e.g. the optimizations performed by a compiler, or the details of a the indexing scheme used in a database system), *the input* (values passed into the system), *hw/sw environment* (CPU, OS, libraries, compiler optimizations, location in virtual memory).
+Random effects include location in physical memory, system load, scheduling, context switches, hw interrupts, randomized algorithms.
+Fixed effects depend on the configuration, randomize the aspects of the configuration that affect execution time.
+Random effects are modeled or summarized using statistical methods.
+
+## Acquisition
+
+1. We use amazon EMR to run jobs on a virtual cluster as shown in setup 1.
+2. We use rmd to execute hadoop job repeatedly.
+
+```{r results='hide', message=TRUE, warning=TRUE, cache=FALSE}
+runHadoopJob <- function() {
+  system("make exec", intern = FALSE,
+       ignore.stdout = TRUE, ignore.stderr = TRUE,
+       wait = TRUE, input = NULL, show.output.on.console = TRUE)
+}
+
+if (NUM_MEASUREMENTS > 0){
+  fileConn<-file("out/results/benchmark_out.csv", 'a')
+  for(i in 1: NUM_MEASUREMENTS){
+    system.time(runHadoopJob()) -> out
+    writeLines(paste("\nLocal", gettextf(out["elapsed"]), "op/ms", sep = ","), fileConn )
+  }
+  close(fileConn)
+}
+```
+
+
+## Analysis
+
+```{r cache=FALSE, fig.margin=TRUE}
+out <- read.csv("out/results/benchmark_out.csv", header = TRUE)
+out<-out[,-3]
+out$time<-round(out$time/(1000*60), 1)
+```
+
+```{r cache=FALSE, fig.margin=TRUE}
+ggplot(out, aes(x=maxThreads, y=time)) + 
+  geom_boxplot() +
+  xlab("EMR/Hadoop") +
+  ylab("Elapsed Time (min)") 
+```
+

@@ -1,0 +1,79 @@
+---
+title: "Assignment Report - A6"
+author: "Shabbir, Sharad"
+date: "October 25, 2017"
+output:
+  pdf_document:
+    fig_crop: no
+    fig_width: 5
+  html_document: default
+---
+
+```{r setup, echo=FALSE, results='hide',message=FALSE, warning=FALSE, cache=FALSE}
+setwd(getwd())
+library(ggplot2)
+library(scales)
+library(plyr)
+library(microbenchmark)
+library(reshape2)
+```
+
+The goal of this assignment is to explore spark and try building problem statements using scala and spark.
+
+## Program Design
+We decided as this assignment is simple enough we would create a single file with a list of tasks. (Most of it are one liners.)
+
+## Assumptions and Specifications
+
+##### 1. number of distinct songs, artists, and albums
+  * **Song:** A song can have more than one track. So distince songs are based on `SONG_ID`.
+  * **Artist:** Based on `ARTIST_ID`.
+  * **Album:** Two or more artist can have same album names. So we take combination of `ARTIST_ID` & `RELEASE` to find unique albums.
+  
+##### 2. top 5 loudest songs
+  * Louder the song more negative its `LOUDNESS` will be.
+
+##### 3. top 5 longest songs
+  * `DURATION` will be solely used to calculate length irrespective of `END_OF_FADE_IN`, `START_OF_FADE_IN`.
+
+##### 4. top 5 fastest songs
+  * `TEMPO` is directly proportional to the speed of song.
+
+##### 5. top 5 most familiar artists
+  * `ARTIST_ID` is the sole identifier. (Some records may have same `ARTIST_ID` but different `ARTIST_NAMES`). So we pick the name form the entry with largest `ARTIST_FAMILIARITY` for each `ARTIST_ID`. 
+
+##### 6. top 5 hottest songs
+  * `SONG_HOTTTNESSS` is directly proportional to the hotness of song.
+
+##### 7. top 5 hottest artists
+  * `ARTIST_ID` is the sole identifier. (Some records may have same `ARTIST_ID` but different `ARTIST_NAMES`). So we pick the name form the entry with largest `ARTIST_HOTTTNESSS` for each `ARTIST_ID`.
+
+##### 8. top 5 hottest genres (mean artists hotness in artist_term)
+  * We group by `ARTIST_HOTTTNESSS` for every genere and then calculate mean for every genere.
+
+##### 9. top 5 most popular keys (must have confidence > 0.7)
+  * Popularity is based on number of songs that are tagged to that `KEY`.
+
+##### 10. top 5 most prolific artists (include ex-equo items, if any)
+  * Prolific artists are defined as artist that made most number of tracks.
+
+##### 11. top 5 most common words in song titles (excluding articles, prepositions, conjunctions)
+  * We used a custom list of excluding articles, prepositions, conjunctions. Which is in no way complete and comprehensive. However, it removes all the most common words.
+
+## Conclusion
+
+Spark makes it really easy to build multiple layered jobs as compared to hadoop. Compliment it with scala you have a much smaller and consise program.
+
+## Task Assignment
+
+Shabbir was responsible for project setup and solving tasks. And making this report.
+
+Sharad was responsible for packaging and checking in the reuired components and creating the `README.txt`.
+
+# Appendix
+
+## Results
+```{sh}
+make run
+```
+

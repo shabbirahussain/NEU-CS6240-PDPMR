@@ -1,0 +1,266 @@
+---
+title: "Assignment Report - A4"
+author: "Shabbir Hussain, Yu Wen & Navya Kuchibhotla"
+date: "October 13, 2017"
+output:
+  html_document: default
+  pdf_document:
+    fig_crop: no
+    fig_width: 5
+---
+
+```{r setup, echo=FALSE, results='hide',message=FALSE, warning=FALSE, cache=FALSE}
+setwd(getwd())
+library(zoo)
+library(ggplot2)
+library(scales)
+library(plyr)
+library(microbenchmark)
+library(reshape2)
+```
+
+##Program Design
+
+###Outputs
+The goal of our mapreduce workflow is to output the candidate list of the most active airlines and airports along with its related information. 
+
+The reason of outputting the candidate list instead of the exact most active airlines/airports is that sorting according to values in mapreduce can be expensive. Here are two feasible approaches, both are expensive to do.We can either force the number of partition to be one and buffer the values to be sorted in memory, however, this means we are abandoning the distributed structure of mapreduce and costing huge amount of memory usage.  Alternatively, we can run to map reduce job, the first one will calculate the top lists using multiple reducers the second one will calculate the mean delay information we need according to the top lists. However, this will lead to read the entire data set twice plus a lot of data will be transferred between map and reduce phase in the above two mapreduce job.
+
+One advantage of outputting the candidate list is that the list is relatively small enough, so that we can sort the results in R markdown. Sorting a relatively small list in R is much cheaper than sorting a large list through mapreduce.
+
+
+Another aspect we do differently is that in addition to just listing the mean delay of each most active airline/airport in each month, we also want to analysis the data in that month such that for each airport in the most active list, which airlines contribute the most number of flights and what was their mean delay in that month.
+
+So, the output of candidate in list of most active airport is a bunch of records, where each record consists of 
+
+
+([AIRPORT_TAG, AIRPORT_NAME, INCOMING_AIRLINE_NAME, MONTH] , [SUM_OF_DELAY_IN_PERCENTAGE, SUM_OF_DELAY_FREQUENCY, SUM_OF_NUMBER_OF_FLIGHTS_ARRIVES]). 
+
+
+The first "[]" indicates composite key, with each filed separated by ","; The second "[]" indicates the value of the composite key, with each field separated by ",". Similarly, for the airline , the record will be 
+
+
+([AIRLINE_TAG, AIRLINE_NAME, DESTINATION_AIRPORT_NAME , MONTH] , [SUM_OF_DELAY_IN_PERCENTAGE, SUM_OF_DELAY_FREQUENCY, SUM_OF_NUMBER_OF_FLIGHTS]).
+
+
+In general the record outputted by the mapreduce will be
+
+
+([KEY1TYPE, KEY1, KEY2, YEARMONTH],[SUM_OF_DELAY_IN_PERCENTAGE,SUM_OF_DELAY_FREQUENCY,SUM_OF_NUMBER_OF_FLIGHTS]
+
+
+###Mapreduce Design
+Our design of mapreduce flow emphasis on only reading the dataset once and do another reduce side join, which is cheaper than reading the dataset twice.
+
+
+####First mapreduce job
+
+##### Partitioner 
+In order to make sure all the flight number can be counted, for each [KEY1TYPE,KEY1,KEY2,YEARMONTH], a partitioner are used. The partition number are calculated base on KEY1TYPE and KEY1 such that all the records for KEY1 will go into the same partitioner.
+
+
+#####Mapper
+1.Input the records in the dataset
+2. emit key value pairs according to the input：
+
+([AIRPORT_TAG, AIRPORT_NAME, INCOMING_AIRLINE_NAME, MONTH] , [DELAY_IN_PERCENTAGE, DELAY_FREQUENCY, NUMBER_OF_FLIGHTS])
+([AIRLINE_TAG, AIRLINE_NAME, DESTINATION_AIRPORT_NAME , MONTH] , [DELAY_IN_PERCENTAGE, DELAY_FREQUENCY, NUMBER_OF_FLIGHTS]).
+
+#####Combiner:
+combines some results from the mapper into
+
+
+([AIRPORT_TAG, AIRPORT_NAME, INCOMING_AIRLINE_NAME, MONTH] , [SUM_OF_DELAY_IN_PERCENTAGE, SUM_OF_DELAY_FREQUENCY, SUM_OF_NUMBER_OF_FLIGHTS_ARRIVES]). 
+
+([AIRLINE_TAG, AIRLINE_NAME, DESTINATION_AIRPORT_NAME , MONTH] , [SUM_OF_DELAY_IN_PERCENTAGE, SUM_OF_DELAY_FREQUENCY, SUM_OF_NUMBER_OF_FLIGHTS_ARRIVES]). 
+
+#####Reducer:
+1. reduce the results into
+([AIRPORT_TAG, AIRPORT_NAME, INCOMING_AIRLINE_NAME, MONTH] , [SUM_OF_DELAY_IN_PERCENTAGE, SUM_OF_DELAY_FREQUENCY, SUM_OF_NUMBER_OF_FLIGHTS_ARRIVES]).
+
+([AIRLINE_TAG, AIRLINE_NAME, DESTINATION_AIRPORT_NAME , MONTH] , [SUM_OF_DELAY_IN_PERCENTAGE, SUM_OF_DELAY_FREQUENCY, SUM_OF_NUMBER_OF_FLIGHTS_ARRIVES]). 
+
+2. Collect the information of
+([AIRPORT_TAG, AIRPORT_NAME, INCOMING_AIRLINE_NAME, MONTH] , [SUM_OF_NUMBER_OF_FLIGHTS_ARRIVES])
+and 
+([AIRLINE_TAG, AIRLINE_NAME, DESTINATION_AIRPORT_NAME , MONTH] , [SUM_OF_NUMBER_OF_FLIGHTS_ARRIVES])
+
+Then sort them in descending order according to "SUM_OF_NUMBER_OF_FLIGHTS_ARRIVES". 
+
+
+3.For the key 
+
+[AIRPORT_TAG, AIRPORT_NAME, INCOMING_AIRLINE_NAME, MONTH]  or [AIRLINE_TAG, AIRLINE_NAME, DESTINATION_AIRPORT_NAME , MONTH]
+
+in the top list, emit a special pair for the key such that 
+
+([AIRPORT_TAG, AIRPORT_NAME, BLANK_KEY,BLANK_KEY] , [-1, 0, -1])
+
+or 
+
+([AIRLINE_TAG, AIRLINE_NAME, BLANK_KEY , BLANK_KEY] , [-1, 0, -1])
+
+
+
+
+#### Second Mapreduce job:
+This job performs a reduce side join which uses a reducer and a comparator.
+
+#### The Comparator
+The comparator group the data from output of the first mapreduce by using the keys of KEY1TYPE and KEY1. 
+For keys in the top list, since a special pair ([KEY1TYPE, KEY1, BLANK_KEY,BLANK_KEY] , [-1, 0, -1])  are produced in previous step, the group comparator will concatenate the top lists records into following form. 
+
+([AIRPORT_TAG, AIRPORT_NAME, BLANK_KEY,BLANK_KEY] , [-1, 0, -1])
+([AIRPORT_TAG, AIRPORT_NAME, INCOMING_AIRLINE_NAME, MONTH] , [SUM_OF_NUMBER_OF_FLIGHTS_ARRIVES])
+([AIRPORT_TAG, AIRPORT_NAME, INCOMING_AIRLINE_NAME, MONTH] , [SUM_OF_NUMBER_OF_FLIGHTS_ARRIVES])
+([AIRPORT_TAG, AIRPORT_NAME, INCOMING_AIRLINE_NAME, MONTH] , [SUM_OF_NUMBER_OF_FLIGHTS_ARRIVES])
+  ......
+  
+  
+Or 
+
+([AIRLINE_TAG, AIRLINE_NAME, BLANK_KEY , BLANK_KEY] , [-1, 0, -1])
+([AIRLINE_TAG, AIRLINE_NAME, DESTINATION_AIRPORT_NAME , MONTH] , [SUM_OF_NUMBER_OF_FLIGHTS_ARRIVES])
+([AIRLINE_TAG, AIRLINE_NAME, DESTINATION_AIRPORT_NAME , MONTH] , [SUM_OF_NUMBER_OF_FLIGHTS_ARRIVES])
+([AIRLINE_TAG, AIRLINE_NAME, DESTINATION_AIRPORT_NAME , MONTH] , [SUM_OF_NUMBER_OF_FLIGHTS_ARRIVES])
+.....
+
+
+The special pair can be ensured to appear in the first row since two field of the composite key is blank.
+
+For keys that are not in the top list there are no special pair.
+
+#### The Reducer
+The reducer input the data mentioned mentioned in the comparator.
+It will read the row to see whether a special pair exists. If it exists, it indicates the key is in the top list, then the reducer output all the pairs of that key but the first row( it should be skipped since it was used as a marker for top list).
+```{r, echo=FALSE, results='hide'}
+dfRawData = read.csv('out/results/task_out.csv', header = F, sep = ',', quote = "")
+colnames(dfRawData) = c("keyCode", "key1", "key2", "date", "delay", "delayFreq", "flightCount")
+dfRawDataNNull = subset(dfRawData, !(is.na(dfRawData$delay)))
+
+# Pick the top 5 Airlines and Destinations 
+splitsOnKey  <- split(dfRawDataNNull, f=dfRawDataNNull$keyCode)
+airlines      <- aggregate(flightCount ~ key1, splitsOnKey[[1]], sum)
+destinations  <- aggregate(flightCount ~ key1, splitsOnKey[[2]], sum)
+topAirlines   <- airlines[order(airlines$flightCount, decreasing=TRUE), ][1:5,]
+topAirports   <- destinations[order(destinations$flightCount, decreasing=TRUE), ][1:5,]
+
+# Transform data to filter top Airlines and Airports
+filteredAirlines <- subset(splitsOnKey[[1]], key1 %in% topAirlines$key1)
+filteredAirlines$date = as.yearmon(as.character(filteredAirlines$date), format='%Y%m')
+filteredAirlines$year = format(filteredAirlines$date, '%Y')
+filteredAirlines$month = format(filteredAirlines$date, '%m')
+
+filteredDestinations <- subset(splitsOnKey[[2]], key1 %in% topAirports$key1)
+filteredDestinations$date = as.yearmon(as.character(filteredDestinations$date), format='%Y%m')
+filteredDestinations$year = format(filteredDestinations$date, '%Y')
+filteredDestinations$month = format(filteredDestinations$date, "%m")
+
+## Aggregate over all the years
+aggregatedAirlineSums = ddply(filteredAirlines,.(key1,year), summarize, delay=sum(delay), delayFreq=sum(delayFreq))
+aggregatedAirlineSums$mean = aggregatedAirlineSums$delay/aggregatedAirlineSums$delayFreq
+
+aggregatedAirportSums = ddply(filteredDestinations,.(key1,year), summarize, delay=sum(delay), delayFreq=sum(delayFreq))
+aggregatedAirportSums$mean = aggregatedAirportSums$delay/aggregatedAirportSums$delayFreq
+```
+
+### Visualization of Delays:
+
+##### 1. Aggregate Mean Delays:  
+The two graphs below plot the over all mean delyas for five most active airlines and for the five most active airports in the country over the entire data set.
+
++ The graph below plots mean delays for top 5 airlines observed for each year over the entire data set.
+```{r, echo=FALSE, results='hide'}
+# Create Line Chart for Airlines
+aggregatedAirlineSums$numKey <- as.numeric(aggregatedAirlineSums$key1)
+keys <- unique(aggregatedAirlineSums$numKey)
+# get the range for the x and y axis
+xrange <- range(aggregatedAirlineSums$year)
+yrange <- range(aggregatedAirlineSums$mean)
+# set up the plot
+plot(xrange, yrange, type="n", xlab="Years", ylab="Mean Delays" )
+keyCount <- length(keys)
+colors <- rainbow(keyCount)
+linetype <- c(1:keyCount)
+plotchar <- seq(18,18+keyCount,1)
+# add lines
+it <- 1
+for (i in keys) {
+  airline <- subset(aggregatedAirlineSums, numKey==i)
+  lines(airline$year, airline$mean, type="b", lwd=1,
+    lty=1, col=colors[it], pch=plotchar[it])
+  it <- it + 1
+}
+# add a title and a legend
+title("Mean Delays for Top Airlines", "")
+legend("topright", NULL, unique(aggregatedAirlineSums$key1)[1:keyCount], col=colors, pch=plotchar, lty=1, title="Airlines", cex=0.8)
+```
+
++ The graph below plots mean delays for top 5 airports observed for each year over the entire data set.
+```{r, echo=FALSE, results='hide'}
+# Create Line Chart for Airports
+aggregatedAirportSums$numKey <- as.numeric(aggregatedAirportSums$key1)
+keys <- unique(aggregatedAirportSums$numKey)
+# get the range for the x and y axis
+xrange <- range(aggregatedAirportSums$year)
+yrange <- range(aggregatedAirportSums$mean)
+# set up the plot
+plot(xrange, yrange, type="n", xlab="Years", ylab="Mean Delays" )
+keyCount <- length(keys)
+colors <- rainbow(keyCount)
+linetype <- c(1:keyCount)
+plotchar <- seq(18,18+keyCount,1)
+# add lines
+it <- 1
+for (i in keys) {
+  airport <- subset(aggregatedAirportSums, numKey==i)
+  lines(airport$year, airport$mean, type="b", lwd=1,
+    lty=1, col=colors[it], pch=plotchar[it])
+  it <- it + 1
+}
+# add a title and legend
+title("Mean Delays for Top Airports", "")
+legend("topright", NULL, unique(aggregatedAirportSums$key1)[1:keyCount], col=colors, pch=plotchar, lty=1, title="Airports", cex=0.8)
+## END OF YEAR GRAPHS
+```
+
+
+##### 2. Mean Delays for year 2010:  
+Among the data from all the years we picked year 2010 at random, and graphs below plot two parts:  
++ Mean delay per flight, for all the airlines arriving at the top 5 airports, plotted for each month.   
+For example if we were to look at the flights arriving at Atlanta airport (ATL) in the month of Jan, we know from the data, that our best bet to avoid delays would be to take the Continental Airlines(CO) rather than the EVA Air(EV). Similarly for the month of Aug, Delux Public Charter(XE) does much better than PSA Airlines(OH).
+```{r, echo=FALSE, fig.width=10,fig.height=15, results='hide'}
+## Look at last year's data
+# title("Mean Delays for Top Airports for Year 2010")
+lastYearDestinations <- subset(filteredDestinations, year=="2010")
+lastYearDestinations = subset(lastYearDestinations, (lastYearDestinations$delay > 0))
+lastYearDestinations$mean = lastYearDestinations$delay/lastYearDestinations$delayFreq
+lastYearDestinations$month = factor(format(lastYearDestinations$date, '%b'), levels = month.abb)
+sort(lastYearDestinations$month)
+# lastYearDestinations <- subset(lastYearDestinations, key2 %in% topAirlines$key1)
+ggplot(data=lastYearDestinations, aes(month, mean)) +
+  geom_bar(aes(fill=key2), position="dodge", stat="identity") +
+  facet_wrap(~ key1, ncol=1) +
+  xlab("Months") + ylab("Mean Delay in mintues") +
+  coord_flip() +
+  theme(legend.position="top", legend.background = element_rect(fill="lightgrey")) +
+  labs(x = "", fill = "Airlines")
+```
+
++ Mean delay per flight, for all the airports that the top 5 airlines fly to, plotted for each month.  
+For example if we were to look at the American Airlines(AA) flying flights during the month of Sep, we can notice that flights going to Tucson International Airport, Arizona (TUS), have a much better performance compared to flights going to Manchester, New Hampshire (MTH).
+```{r, echo=FALSE, fig.width=10,fig.height=15, results='hide'}
+lastYearAirlines <- subset(filteredAirlines, year=="2010")
+lastYearAirlines = subset(lastYearAirlines, (lastYearAirlines$delay > 0))
+lastYearAirlines$mean = lastYearAirlines$delay/lastYearAirlines$delayFreq
+lastYearAirlines$month = factor(format(lastYearAirlines$date, '%b'), levels = month.abb)
+sort(lastYearAirlines$month)
+# lastYearAirlines <- subset(lastYearAirlines, key2 %in% topAirports$key1)
+ggplot(data=lastYearAirlines, aes(month, mean)) +
+  geom_bar(aes(fill=key2), position = "dodge", stat="identity") +
+  facet_wrap(~ key1, ncol=1) +
+  xlab("Months") + ylab("Mean Delay in mintues") +
+  coord_flip() +
+  theme(legend.position="top", legend.background = element_rect(fill="lightgrey")) +
+  labs(x = "", fill = "Airports")
+```

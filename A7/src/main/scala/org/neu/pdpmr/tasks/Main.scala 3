@@ -1,0 +1,145 @@
+
+// scalastyle:on println
+package org.neu.pdpmr.tasks
+
+import java.text.SimpleDateFormat
+import java.util.Date
+
+import main.scala.org.neu.pdpmr.tasks.types.{ArtistRecord, SimilarArtist, SongRecord}
+import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.SparkSession
+
+/**
+ * @author shabbir.ahussain
+ */
+object Main {
+  val DF = new SimpleDateFormat("yyyy/mm/dd HH:mm:ss")
+  val MostPopMax = 3
+  val NumIter = 10
+  var inputPath = "input/"
+
+  def main(args: Array[String]) {
+    if (args.length > 0)
+      inputPath = args(0)
+
+    val spark = SparkSession
+      .builder()
+      .appName("Task A6")
+      .config("spark.master", "local")
+      .getOrCreate()
+    val sc = spark.sparkContext
+    sc.setLogLevel("ERROR")
+
+    taskA7Sp2(sc)
+    spark.stop()
+  }
+
+  def getTrendSetters(songs: RDD[SongRecord], similar: RDD[SimilarArtist]): Set[String] ={
+    // Get artist familiarity.
+    val artMaxFam = songs.map(x => (x.ARTIST_ID, x.ARTIST_FAMILIARITY))
+      .combineByKey[Double]((v:Double) => v,
+      (u: Double, v: Double) => Math.max(u, v),
+      (u1: Double, u2: Double) => Math.max(u1, u2))
+
+    // Get artist song count.
+    val artSongCnt = songs.map(x => (x.ARTIST_ID, x.SONG_ID))
+      .distinct
+      .combineByKey[Double](
+      (v:String) => 1.0,
+      (u: Double, v: String)   => u + 1,
+      (u1: Double, u2: Double) => u1 + u2)
+
+    // Get similar artist count.
+    val simArtCnt = similar.map(x => (x.ARTIST_ID_1, x.ARTIST_ID_2))
+      .distinct
+      .combineByKey[Double](
+      (v:String) => 1.0,
+      (u: Double, v: String)   => u + 1,
+      (u1: Double, u2: Double) => u1 + u2)
+
+    val res = artMaxFam.join(artSongCnt)
+      .mapValues(x=> x._1 * x._2)
+      .join(simArtCnt)
+      .mapValues(x=> x._1 * x._2)
+      .top(MostPopMax)(Ordering[Double].reverse.on(x => -x._2))
+      .map(x=> x._1)
+      .toSet
+    res
+  }
+
+//  def getCommanality(artist: RDD[ArtistRecord]): RDD[((String, String), Int)] ={
+//    val at = artist.map(x=> (x.ARTIST_TERM, x.ARTIST_ID)).distinct.cache
+//    val res = at.join(at)
+//      .map(_.swap)
+//      .filter(x => !x._1._1.equals(x._1._2))
+//      .combineByKey[Int](
+//      (v:String)=>1,
+//      (u:Int, v:String) => u + 1,
+//      (u1:Int, u2:Int)  => u1 + u2)
+//    res
+//  }
+
+  def taskA7Sp2(sc: SparkContext){
+    val songs   = SongRecord.loadCSV(sc, inputPath)
+    val artist  = ArtistRecord.loadCSV(sc, inputPath)
+    val similar = SimilarArtist.loadCSV(sc, inputPath)
+
+    val artistTerms = artist.map(x=> (x.ARTIST_ID, x.ARTIST_TERM))
+      .aggregateByKey(Set[String]())(
+        (u,v)=> u + v,
+        (u1, u2) => u1 ++ u2)
+      .cache()
+
+    // Get initial centroids from trend setters.
+    val trendsetters = getTrendSetters(songs, similar)
+    var newCentroids = artistTerms
+      .filter(x => trendsetters.contains(x._1))
+      .map(_._2)
+
+    for(i <- 1 to NumIter) {
+      System.out.println("Iteration " + i)
+      var oldCentroids = newCentroids
+
+      // Assign points to the appropriate centroids.
+      val clstrAssgn = artistTerms.cartesian(oldCentroids)
+        .map(x => (x._1._1, (x._2, x._1._2.intersect(x._2).count(x => true))))
+        .combineByKey[(Set[String], Int)](
+          (v: (Set[String], Int)) => v,
+          (u:(Set[String], Int), v:(Set[String], Int)) => if (u._2 > v._2) u else v,
+          (u:(Set[String], Int), v:(Set[String], Int)) => if (u._2 > v._2) u else v)
+        //.sortByKey()
+        .cache
+
+      // Reposition the centroids to the mode of the consensus.
+      newCentroids = sc.parallelize(clstrAssgn.map(x => (x._2._1, 1))
+        .combineByKey[Int](
+          (v: Int) => 1,
+          (u: Int, v: Int) => u + 1,
+          (u: Int, v: Int) => u + v)
+        .top(MostPopMax)(Ordering[Double].reverse.on(x => -x._2))
+        .map(x => x._1))
+
+      // Save intermediate result of each iteration.
+      //clstrAssgn.map(v=>v._1 + "," + v._2._1.hashCode()).saveAsTextFile("output/i"+i+".csv")
+
+
+      System.out.println("cent=")
+      newCentroids.foreach(println)
+      // Check for convergence.
+      if (oldCentroids.subtract(newCentroids).count() == 0){
+        System.out.println("Convergence reached @ iter")
+      }
+    }
+  }
+
+  def timeBlock[R](block: => R): R = {
+    val t0 = System.currentTimeMillis()
+    println("-- Start time:" + DF.format(new Date(t0)))
+    val res = block    // call-by-name
+    val t1 = System.currentTimeMillis()
+    println("-- Elapsed time: " + (t1 - t0)/1000 + "s")
+    res
+  }
+}
+
