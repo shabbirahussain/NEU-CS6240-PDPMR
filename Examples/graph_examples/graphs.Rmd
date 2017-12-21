@@ -1,0 +1,112 @@
+---
+title: "Data presentation for Ayshi & Manthan's A7 report"
+author: "K. Siek"
+date: "11/6/2017"
+output:
+  pdf_document:
+    fig_crop: no
+  html_document: default
+  word_document: default
+---
+
+
+```{r setup, echo=FALSE, results='hide',message=FALSE, warning=FALSE, cache=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = normalizePath(getwd()))
+library(ggplot2)
+require(gridExtra)
+library(knitr)
+library(kableExtra)
+```
+
+```{r definitions, include=FALSE, warning=FALSE}
+library(dplyr)
+require(gridExtra)
+library(scales)
+
+HOME <- getwd()
+
+get_cluster <- function (file, cluster_labels) {
+  data <- read.csv(file, header=FALSE) %>% rename(cluster.no=V1, value=V2)
+  names <- data %>% 
+    group_by(cluster.no) %>% summarise(center=mean(value)) %>% arrange(center) %>% 
+    mutate(cluster=!!cluster_labels)
+  data %>% left_join(names, by="cluster.no") %>% select(cluster, value)
+}
+
+get_2d_cluster <- function (file, cluster_labels) {
+  data <- read.csv(file, header=FALSE) %>% rename(cluster.no=V1, x=V2, y=V3)
+  names <- data %>% 
+    group_by(cluster.no) %>% summarise(center=mean(x * y)) %>% arrange(center) %>% 
+    mutate(cluster=!!cluster_labels)
+  data %>% left_join(names, by="cluster.no") %>% select(cluster, x, y)
+}
+
+length_clustering <- function(data, title="k-means, full dataset") {
+  cluster.plot <-
+    ggplot(data, aes(cluster, value/60, fill="black")) +
+    geom_violin(position = "dodge") +
+    labs(title="By length", subtitle=title) +
+    ylab("song length") +
+    scale_y_continuous(labels=function(x) ifelse(x==0, 0, dollar_format(suffix = "min", prefix = "")(x))) +
+    theme(axis.title.x=element_blank(), legend.position="none") +
+    scale_fill_grey() + scale_color_grey()
+  
+  count <- data %>% group_by(cluster) %>% count
+  
+  count.plot <-
+    ggplot(data=count, aes(x="", y=n, fill=cluster)) +
+    geom_bar(width=2, stat="identity", position=position_stack(reverse=TRUE)) +
+    geom_label(
+      aes(label=paste0(cluster, ": ", format(n/sum(n)*100, digits=0), "%"), fill="white"), 
+      position=position_stack(reverse=TRUE)) +
+    labs(title="", subtitle="") +
+    ylab("songs") +
+    scale_y_continuous(position="right", 
+                       labels=function(x) ifelse(x>=1000000, paste0(x/1000000,"mln"), ifelse(x==0, x, paste0(x/1000,"k")))) +
+    theme(axis.title.x=element_blank(), legend.position="none", axis.ticks.x=element_blank()) +
+    scale_fill_grey() + scale_color_grey()
+  
+  grid.arrange(cluster.plot, count.plot, ncol=2, widths=c(2,1))
+}
+
+hotness_2d_clustering <- function(data, title) {
+  cluster.plot <-
+    ggplot(data, aes(x=floor(x*12)/12, y=floor(y*12)/12, color=cluster, shape=cluster)) + 
+    geom_count() +
+    labs(title="By combined hotness", subtitle=title, size="# songs", colour="cluster") +
+    ylab("artist hotness") + xlab("song hotness") +
+    scale_size_continuous(labels=function(x) ifelse(x>=1000000, paste0(x/1000000,"mln"), ifelse(x==0, x, paste0(x/1000,"k")))) +
+    #scale_fill_grey() + scale_color_grey() 
+    scale_color_brewer(palette="Set1", direction=-1)
+
+  count <- data %>% group_by(cluster) %>% count
+
+  count.plot <- 
+    ggplot(data=count, aes(x="", y=n, fill=cluster)) +
+    geom_bar(width=2, stat="identity", position=position_stack(reverse = TRUE)) +
+    geom_label(
+      aes(label=paste0(cluster, ": ", format(n/sum(n)*100, digits=0), "%")),  
+      position=position_stack(reverse = TRUE)) +
+    labs(title="", subtitle="") +
+    ylab("songs") +
+    scale_y_continuous(position="right", 
+                       labels=function(x) ifelse(x>=1000000, paste0(x/1000000,"mln"), ifelse(x==0, x, paste0(x/1000,"k")))) +
+    theme(axis.title.x=element_blank(), legend.position="none", axis.ticks.x=element_blank()) +
+    #scale_fill_grey() + scale_color_grey()
+    scale_fill_brewer(palette="Set1", direction=-1)
+ 
+ grid.arrange(cluster.plot, count.plot, ncol=2, widths=c(3,1))
+}
+```
+
+
+```{r kmeans.length.full.plots, fig.width=6, fig.height=3, echo=FALSE}
+kmeans.length.full <- get_cluster(file.path(HOME, "kmeans-length/part-00000"), c("short","medium","long"))
+length_clustering(kmeans.length.full, "k-means, million songs dataset")
+```
+
+```{r kmeans.combined.hotness.full.plots, fig.width=6, fig.height=4, echo=FALSE}
+kmeans.combined.hotness <- get_2d_cluster(file.path(HOME, "combined-hotness/part-00000"), c("cold","mild","hot"))
+hotness_2d_clustering(kmeans.combined.hotness, "k-means, million songs dataset")
+```
